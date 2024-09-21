@@ -11,6 +11,7 @@ float headrad = 10.0f;
 
 int initpoints = 4;
 float length = 4.0f;
+float timeExp = 1.0f;
 
 const int screenWidth = 700;
 const int screenHeight = 600;
@@ -61,11 +62,17 @@ int main(void)
 
     while (!WindowShouldClose())    
     {
+        float dt = GetFrameTime();
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-            direction = Vector2Normalize(Vector2Subtract(GetMousePosition(), snakepos));
-            snakepos = Vector2Add(snakepos, Vector2Scale(direction, speed*1.0f*GetFrameTime()));
+            Vector2 offset = Vector2Subtract(GetMousePosition(), snakepos);
+            float length = sqrtf((offset.x*offset.x) + (offset.y*offset.y));
+            if(length > 10.0f){
+                direction = {offset.x/length, offset.y/length};
+                snakepos = Vector2Add(snakepos, Vector2Scale(direction, speed*1.0f*dt));
+            }
+            
         }
-        snakepos = Vector2Add(snakepos, Vector2Scale(direction, speed*GetFrameTime()));
+        snakepos = Vector2Add(snakepos, Vector2Scale(direction, speed*dt));
         
         ClampPosition(snakepos);
         points[0] = snakepos;
@@ -79,6 +86,7 @@ int main(void)
             food = {static_cast<float>(GetRandomValue(foodrad, screenWidth-foodrad)), static_cast<float>(GetRandomValue(foodrad, screenHeight-foodrad))};
             speed += 4.0f;
         }
+
         BeginDrawing();
             DrawTexture(ground, 0, 0, WHITE);
             DrawFPS(10, 10);
